@@ -1,0 +1,18 @@
+ARG PYTHON_VERSION=3.12.3
+FROM python:${PYTHON_VERSION}-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    python3-dev \
+    pkg-config \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY ordenavia/requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+COPY ordenavia /app/
+
+CMD ["gunicorn", "ordenavia.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]

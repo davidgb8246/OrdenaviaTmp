@@ -1,0 +1,382 @@
+ordenavia.net
+
+Mesa:
+    - libre
+    - reservada
+    - ocupada (clientes sentados)
+        - pidiendo
+        - esperando
+        - retirar (clientes han terminado de comer algo)
+    - sucia (sin clientes pero no lista)
+
+
+Objetivos:
+El principal objetivo de esta aplicación es mejorar la eficiencia 
+dentro del entorno laboral de un restaurante, agilizando la 
+gestión de pedidos y optimizando la comunicación entre el salón y 
+la cocina.
+
+- Creación de la interfaz completa del restaurante, incluyendo la 
+carta digital.
+    - Productos mas vendidos
+    - Productos destacados
+    - Productos novedosos
+    - ATENCION ALERGENOS
+
+- Gestión de reservas tanto en la web de manera autonoma por el
+cliente como manual por los trabajadores.
+
+- Gestión de cola del restaurante, cuando hay mucha gente
+esperando y se necesita asignar mesas poco a poco.
+
+- Gestión de pedidos en tiempo real, con posibilidad de que los 
+camareros creen pedidos manualmente y puedan modificar pedidos
+en tiempo real.
+
+- Envío automático de los pedidos a la cocina y notificación al 
+camarero cuando estén listos para servir.
+
+- Capacidad de asignar partes de la preparación de un producto
+a distintas vistas dentro de la cocina, o productos concretos
+para vistas concretas.
+
+    - Ver estados de las categorias de los productos pedidos.
+
+- Capacidad en cocina de marcar un producto como pendiente,
+en preparacion, listo.
+
+- Funcionalidades de administración para que el gerente pueda 
+supervisar y gestionar los procesos automáticos, incluyendo la 
+reasignación de pedidos entre camareros si es necesario.
+
+- Facilitar la solicitud de la cuenta desde la plataforma para 
+reducir los tiempos de espera de los clientes al finalizar su 
+comida. Generando un qrcode para pagar en caja mas facilmente.
+
+- Sugerencia de poner valoraciones, e incluso valoraciones
+por producto.
+
+
+###############################################
+
+
+- Creación de la interfaz completa del restaurante, incluyendo la 
+carta digital.
+    - Productos mas vendidos
+    - Productos destacados
+    - Productos novedosos
+    - ATENCION ALERGENOS
+
+
+- Gestión de pedidos en tiempo real, con posibilidad de que los 
+camareros creen pedidos manualmente y puedan modificar pedidos
+en tiempo real.
+
+- Envío automático de los pedidos a la cocina y notificación al 
+camarero cuando estén listos para servir.
+
+- Capacidad de asignar partes de la preparación de un producto
+a distintas vistas dentro de la cocina, o productos concretos
+para vistas concretas.
+
+    - Ver estados de las categorias de los productos pedidos.
+
+- Capacidad en cocina de marcar un producto como pendiente,
+en preparacion, listo.
+
+- Funcionalidades de administración para que el gerente pueda 
+supervisar y gestionar los procesos automáticos, incluyendo la 
+reasignación de pedidos entre camareros si es necesario.
+
+
+- Facilitar la solicitud de la cuenta desde la plataforma para 
+reducir los tiempos de espera de los clientes al finalizar su 
+comida. Generando un qrcode para pagar en caja mas facilmente.
+
+
+###############################################
+###############################################
+###############################################
+
+
+Sistema de autenticación:
+    app: authentication
+
+Carta digital:
+    app: menu
+
+Pedidos:
+    app: orders
+
+Administracion gerente:
+    app: management
+
+Pedir cuenta:
+    app: checkout
+
+
+
+
+Rol				|	Nivel	|		  Hereda de			|	Permisos directos
+Customer		|	0		|	-						|	view_menu, view_best_sellers, view_featured_products, view_new_products, view_allergens_info, request_bill, generate_qr_payment
+Waiter			|	1		|	Customer				|	create_order, edit_order, view_order_status
+KitchenStaff	|	1		|	-						|	view_kitchen_orders, update_kitchen_status, view_kitchen_categories
+Supervisor		|	2		|	Waiter, KitchenStaff	|	assign_order, monitor_orders
+Manager			|	3		|	Supervisor				|	assign_kitchen_views, manage_restaurant_settings
+Admin			|	4		|	Manager					|	manage_users, manage_roles
+
+
+
+
+mejorar sortSchedules
+en handleScheduleChange, no llamar siempre
+
+alergenos custom por restaurante
+listado de productos
+
+roles, comprables con stripe para poder crear x cantidad de restaurantes
+carrito
+
+sistema pedidos
+
+
+
+
+
+
+
+
+
+
+
+Schedules(schedule_id, target_type, target_id, day_of_week, opening_time, closing_time, is_closed, shift_name, created_at, updated_at)
+
+Company(company_id, legal_name, commercial_name, tax_id, fiscal_address, phone, email, status, created_at, updated_at)
+  |
+  |- 1:N -> Schedules(...)
+  |- 1:N -> Brand(brand_id, company_id, name, description, status, created_at, updated_at)
+            |
+            |- 1:N -> Product(product_id, brand_id, internal_name, internal_description, reference_code, created_at, updated_at)
+            |- 1:N -> ProductOption(option_id, brand_id, internal_name, reference_code, created_at, updated_at)
+            |- 1:N -> ProductCategory(category_id, brand_id, internal_name, internal_description, reference_code, created_at, updated_at)
+            |
+            |- 1:N -> Restaurant(restaurant_id, brand_id, name, type, address, city, state, country, phone, email, latitude, longitude, status, created_at, updated_at)
+                      |
+                      |- 1:N -> RestaurantProduct(id, restaurant_id, product_id, name, custom_description, price, reference_code, preparation_notes, estimated_prep_time, is_custom_product, is_customizable, is_available, status, created_at, updated_at)
+                     	|	        |
+                     	|	        |- 1:N -> RestaurantProductImage(id, restaurant_product_id, image_url, type, sort_order, created_at)
+                     	|	        |- 1:N -> RestaurantProductOption(id, restaurant_product_id, option_id, name, is_required, max_quantity, is_available, created_at, updated_at)
+                     	|	                  |
+                     	|	                  |- 1:N -> RestaurantProductOptionValue(id, restaurant_product_option_id, name, price, is_default, is_available, sort_order, created_at)
+                     	|	                            |
+                     	|	                            |- 1:N -> RestaurantProductOptionValueImage(id, option_value_id, image_url, sort_order, created_at)
+                      |
+                      |- 1:N -> RestaurantProductCategory(id, restaurant_id, category_id, parent_id, name, custom_description, sort_order, is_visible, created_at, updated_at)
+                     	|	        |
+                     	|	        |- 1:N -> RestaurantProductCategoryImage(id, category_id, image_url, type, sort_order, created_at)
+                      |
+                      |- N:M -> RestaurantProductCategoryAssignment(id, restaurant_product_id, restaurant_category_id, sort_order, created_at)
+                      |- 1:N -> RestaurantTag(id, restaurant_id, name, image_url, sort_order, created_at, updated_at)
+                     	|	        |
+                     	|	        |- 1:N -> RestaurantProductTag(id, restaurant_product_id, restaurant_tag_id, created_at)
+                      |
+                      |- 1:N -> Schedules(...)
+
+
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from django.utils import timezone
+
+
+
+class Schedule(models.Model):
+    DAYS_OF_WEEK = [
+        ('monday', 'Monday'), ('tuesday', 'Tuesday'), ('wednesday', 'Wednesday'),
+        ('thursday', 'Thursday'), ('friday', 'Friday'), ('saturday', 'Saturday'), ('sunday', 'Sunday')
+    ]
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    target = GenericForeignKey('content_type', 'object_id')
+
+    day_of_week = models.CharField(max_length=10, choices=DAYS_OF_WEEK)
+    opening_time = models.TimeField(blank=True, null=True)
+    closing_time = models.TimeField(blank=True, null=True)
+    is_closed = models.BooleanField(default=False)
+    shift_name = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Company(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+
+    legal_name = models.CharField(max_length=255)
+    commercial_name = models.CharField(max_length=255, blank=True, null=True)
+    tax_id = models.CharField(max_length=100, blank=True, null=True)
+    fiscal_address = models.TextField(blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(max_length=100, blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    schedules = GenericRelation(Schedule, related_query_name='company')
+
+
+class Brand(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class Restaurant(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive')]
+
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=100, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    email = models.EmailField(max_length=100, blank=True, null=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    schedules = GenericRelation(Schedule, related_query_name='restaurant')
+
+
+class Product(models.Model):
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    internal_name = models.CharField(max_length=255)
+    internal_description = models.TextField(blank=True, null=True)
+    reference_code = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RestaurantProduct(models.Model):
+    STATUS_CHOICES = [('active', 'Active'), ('inactive', 'Inactive'), ('archived', 'Archived')]
+
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    custom_description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    reference_code = models.CharField(max_length=50, blank=True, null=True)
+    preparation_notes = models.TextField(blank=True, null=True)
+    estimated_prep_time = models.IntegerField(blank=True, null=True)
+    is_custom_product = models.BooleanField(default=False)
+    is_customizable = models.BooleanField(default=False)
+    is_available = models.BooleanField(default=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RestaurantProductImage(models.Model):
+    TYPE_CHOICES = [('main', 'Main'), ('gallery', 'Gallery'), ('prep', 'Prep'), ('other', 'Other')]
+
+    restaurant_product = models.ForeignKey(RestaurantProduct, on_delete=models.CASCADE)
+    image_url = models.URLField(max_length=255)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='main')
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ProductOption(models.Model):
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    internal_name = models.CharField(max_length=100)
+    reference_code = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RestaurantProductOption(models.Model):
+    restaurant_product = models.ForeignKey(RestaurantProduct, on_delete=models.CASCADE)
+    option = models.ForeignKey(ProductOption, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    is_required = models.BooleanField(default=False)
+    max_quantity = models.IntegerField(default=1)
+    is_available = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RestaurantProductOptionValue(models.Model):
+    restaurant_product_option = models.ForeignKey(RestaurantProductOption, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_default = models.BooleanField(default=False)
+    is_available = models.BooleanField(default=True)
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class RestaurantProductOptionValueImage(models.Model):
+    option_value = models.ForeignKey(RestaurantProductOptionValue, on_delete=models.CASCADE)
+    image_url = models.URLField(max_length=255)
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ProductCategory(models.Model):
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    internal_name = models.CharField(max_length=100)
+    internal_description = models.TextField(blank=True, null=True)
+    reference_code = models.CharField(max_length=50, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RestaurantProductCategory(models.Model):
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    custom_description = models.TextField(blank=True, null=True)
+    sort_order = models.IntegerField(default=0)
+    is_visible = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RestaurantProductCategoryImage(models.Model):
+    TYPE_CHOICES = [('logo', 'Logo'), ('banner', 'Banner'), ('other', 'Other')]
+
+    category = models.ForeignKey(RestaurantProductCategory, on_delete=models.CASCADE)
+    image_url = models.URLField(max_length=255)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='other')
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class RestaurantProductCategoryAssignment(models.Model):
+    restaurant_product = models.ForeignKey(RestaurantProduct, on_delete=models.CASCADE)
+    restaurant_category = models.ForeignKey(RestaurantProductCategory, on_delete=models.CASCADE)
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class RestaurantTag(models.Model):
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    image_url = models.URLField(max_length=255)
+    sort_order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class RestaurantProductTag(models.Model):
+    restaurant_product = models.ForeignKey(RestaurantProduct, on_delete=models.CASCADE)
+    restaurant_tag = models.ForeignKey(RestaurantTag, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
