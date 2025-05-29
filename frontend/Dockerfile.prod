@@ -1,0 +1,22 @@
+FROM node:20.18.1 AS builder
+
+WORKDIR /app
+
+COPY ordenavia/package.json ordenavia/yarn.lock ./
+RUN yarn install
+
+COPY ordenavia/ ./
+RUN yarn build
+
+
+FROM nginx:1.25-alpine
+
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
+
+EXPOSE 80

@@ -1,0 +1,11 @@
+FROM node:20.18.1
+
+WORKDIR /app
+
+# Install dependencies separately to cache them
+COPY ordenavia/package.json ordenavia/yarn.lock ./
+RUN yarn install
+
+# Source code is not copied — volumes are used in development
+
+CMD ["yarn", "dev", "--host"]
